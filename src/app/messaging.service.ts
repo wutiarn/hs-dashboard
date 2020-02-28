@@ -2,6 +2,8 @@ import {Injectable, OnInit} from '@angular/core';
 import {BufferEncoders, JsonSerializers, MESSAGE_RSOCKET_ROUTING, RSocketClient} from "rsocket-core";
 import {ReactiveSocket} from "rsocket-types";
 import RSocketWebSocketClient from "rsocket-websocket-client";
+import {Buffer} from 'buffer/';
+import {logger} from "codelyzer/util/logger";
 
 @Injectable({
   providedIn: 'root'
@@ -51,9 +53,12 @@ export class MessagingService {
 
   requestStream(route: string, data: any) {
     this.waitForSocket(socket => {
+      let metadata = this.encodeRoute(route);
+      console.info("Metadata", metadata);
+      console.info("Requesting stream", socket);
       socket.requestStream({
-        metadata: this.encodeRoute(route),
-        data
+        metadata,
+        data: {}
       }).subscribe(x => {
         console.info('Event', x);
       });
