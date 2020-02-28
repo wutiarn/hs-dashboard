@@ -10,7 +10,7 @@ export class MessagingService {
   private client: RSocketClient<any, any>;
   private socket: ReactiveSocket<any, any>;
 
-  constructor(private messagingService: MessagingService) {
+  constructor() {
     this.client = new RSocketClient({
       serializers: JsonSerializers,
       setup: {
@@ -37,7 +37,12 @@ export class MessagingService {
         console.info('Connected');
         this.socket = socket;
       },
-      onError: error => console.error(error),
+      onError: error => {
+        console.error(error);
+        setTimeout(() => {
+          this.connect();
+        }, 5000);
+      },
       onSubscribe: cancel => {/* call cancel() to abort */
         console.info('subscribe');
       }
@@ -56,7 +61,9 @@ export class MessagingService {
   }
 
   waitForSocket(callback: (socket: ReactiveSocket<any, any>) => any) {
+    console.info("Acquiring socket");
     if (this.socket != null) {
+      console.info("Socket acquired");
       callback(this.socket);
       return;
     }
@@ -64,7 +71,7 @@ export class MessagingService {
     setTimeout(() => {
       console.debug("Waiting for connection...");
       this.waitForSocket(callback);
-    }, 100);
+    }, 1000);
   }
 
   private encodeRoute(route: string): Buffer {

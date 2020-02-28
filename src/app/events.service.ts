@@ -1,10 +1,5 @@
-import { Injectable } from '@angular/core';
-import {Observable} from "rxjs";
+import {Injectable} from '@angular/core';
 import {MessagingService} from "./messaging.service";
-import {EventDto} from "./model/event.dto";
-import {BufferEncoders, JsonSerializers, MESSAGE_RSOCKET_ROUTING, RSocketClient} from "rsocket-core";
-import {ReactiveSocket} from "rsocket-types";
-import RSocketWebSocketClient from "rsocket-websocket-client";
 
 @Injectable({
   providedIn: 'root'
@@ -12,9 +7,11 @@ import RSocketWebSocketClient from "rsocket-websocket-client";
 export class EventsService {
 
   constructor(private messagingService: MessagingService) {
+    this.getEvents();
   }
 
   getEvents() { // Observable<EventDto<any>>
+    console.info("EventsService: calling requestStream()");
     this.messagingService.requestStream("events", null);
   }
 }

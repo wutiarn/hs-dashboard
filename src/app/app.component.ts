@@ -9,6 +9,7 @@ import {
   MESSAGE_RSOCKET_ROUTING
 } from 'rsocket-core';
 import RSocketWebSocketClient from 'rsocket-websocket-client';
+import {EventsService} from "./events.service";
 
 @Component({
   selector: 'app-root',
@@ -18,7 +19,7 @@ import RSocketWebSocketClient from 'rsocket-websocket-client';
 export class AppComponent {
   now = null;
 
-  constructor() {
+  constructor(private eventsService: EventsService) {
 
 
     timer(0, 1000)
