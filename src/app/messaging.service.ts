@@ -1,5 +1,5 @@
 import {Injectable, OnInit} from '@angular/core';
-import {BufferEncoders, JsonSerializers, MESSAGE_RSOCKET_ROUTING, RSocketClient} from "rsocket-core";
+import {BufferEncoders, JsonSerializers, MESSAGE_RSOCKET_ROUTING, RSocketClient, MAX_STREAM_ID} from "rsocket-core";
 import {ReactiveSocket} from "rsocket-types";
 import RSocketWebSocketClient from "rsocket-websocket-client";
 import {Buffer} from 'buffer/';
@@ -23,12 +23,12 @@ export class MessagingService {
         // format of `data`
         dataMimeType: 'application/json',
         // format of `metadata`
-        metadataMimeType: MESSAGE_RSOCKET_ROUTING.string,
+        metadataMimeType: "message/x.rsocket.routing.v0",
       },
       transport: new RSocketWebSocketClient({
         url: 'ws://192.168.10.2:8759/rsocket',
         debug: true
-      }, BufferEncoders),
+      }),
     });
     this.connect();
   }
@@ -42,6 +42,7 @@ export class MessagingService {
       onError: error => {
         console.error(error);
         setTimeout(() => {
+          console.info("Reconnecting...");
           this.connect();
         }, 5000);
       },
@@ -53,14 +54,22 @@ export class MessagingService {
 
   requestStream(route: string, data: any) {
     this.waitForSocket(socket => {
-      let metadata = this.encodeRoute(route);
+      const metadata = this.encodeRoute(route);
       console.info("Metadata", metadata);
       console.info("Requesting stream", socket);
       socket.requestStream({
         metadata,
         data: {}
-      }).subscribe(x => {
-        console.info('Event', x);
+      }).subscribe({
+        onComplete: () => console.info("stream complete"),
+        onError: (e) => console.error("stream error", e),
+        onNext: (msg) => {
+          console.info("Received", msg);
+        },
+        onSubscribe: subscription => {
+          console.info("stream subscribe");
+          subscription.request(MAX_STREAM_ID);
+        }
       });
     });
   }
@@ -74,15 +83,11 @@ export class MessagingService {
     }
 
     setTimeout(() => {
-      console.debug("Waiting for connection...");
       this.waitForSocket(callback);
-    }, 1000);
+    }, 10);
   }
 
-  private encodeRoute(route: string): Buffer {
-    const length = Buffer.byteLength(route, 'utf8');
-    const buffer = Buffer.alloc(1);
-    buffer.writeInt8(length, 0);
-    return Buffer.concat([buffer, Buffer.from(route, 'utf8')]);
+  private encodeRoute(route: string): string {
+    return String.fromCharCode(route.length) + route;
   }
 }
