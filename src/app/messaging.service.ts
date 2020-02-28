@@ -1,16 +1,7 @@
-import {Injectable, OnInit} from '@angular/core';
-import {
-  BufferEncoders,
-  JsonSerializers,
-  JsonSerializer,
-  IdentitySerializer,
-  MESSAGE_RSOCKET_ROUTING,
-  RSocketClient,
-  MAX_STREAM_ID
-} from "rsocket-core";
+import {Injectable} from '@angular/core';
+import {IdentitySerializer, JsonSerializer, MAX_STREAM_ID, RSocketClient} from "rsocket-core";
 import {ReactiveSocket} from "rsocket-types";
 import RSocketWebSocketClient from "rsocket-websocket-client";
-import {Buffer} from 'buffer/';
 
 @Injectable({
   providedIn: 'root'
@@ -41,6 +32,13 @@ export class MessagingService {
       },
       transport: new RSocketWebSocketClient({
         url: 'ws://192.168.10.2:8759/rsocket',
+        wsCreator: url => {
+          const webSocket = new WebSocket(url);
+          webSocket.addEventListener("close", (ev) => {
+            this.reconnect();
+          });
+          return webSocket;
+        },
         debug: true
       }),
     });
@@ -48,20 +46,13 @@ export class MessagingService {
       onComplete: socket => {
         console.info('Connected');
         this.socket = socket;
-      },
-      onError: error => {
-        console.error("Disconnected", error);
-        this.reconnect();
-      },
-      onSubscribe: cancel => {/* call cancel() to abort */
-        console.info('subscribe');
       }
     });
+
   }
 
   reconnect() {
     setTimeout(() => {
-      console.info("Reconnecting...");
       this.connect();
     }, 5000);
   }
@@ -69,19 +60,17 @@ export class MessagingService {
   requestStream(route: string, data: any) {
     this.waitForSocket(socket => {
       const metadata = this.encodeRoute(route);
-      console.info("Metadata", metadata);
-      console.info("Requesting stream", socket);
+      console.debug("Requesting stream", socket);
       socket.requestStream({
         metadata,
         data: {}
       }).subscribe({
-        onComplete: () => console.info("stream complete"),
-        onError: (e) => console.error("stream error", e),
+        onComplete: () => console.info(`[${route}] Stream completed`),
+        onError: (e) => console.error(`[${route}] stream error`, e),
         onNext: (msg) => {
-          console.info("Received", msg);
+          console.debug(`[${route}] Received`, msg);
         },
         onSubscribe: subscription => {
-          console.info("stream subscribe");
           subscription.request(MAX_STREAM_ID);
         }
       });
@@ -89,7 +78,6 @@ export class MessagingService {
   }
 
   waitForSocket(callback: (socket: ReactiveSocket<any, any>) => any) {
-    console.info("Acquiring socket");
     if (this.socket != null) {
       console.info("Socket acquired");
       callback(this.socket);
