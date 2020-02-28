@@ -20,6 +20,10 @@ export class MessagingService {
   private socket: ReactiveSocket<any, any>;
 
   constructor() {
+    this.connect()
+  }
+
+  connect() {
     this.client = new RSocketClient({
       serializers: {
         data: JsonSerializer,
@@ -27,9 +31,9 @@ export class MessagingService {
       },
       setup: {
         // ms btw sending keepalive to server
-        keepAlive: 60000,
+        keepAlive: 1000,
         // ms timeout if no keepalive response
-        lifetime: 180000,
+        lifetime: 5000,
         // format of `data`
         dataMimeType: 'application/json',
         // format of `metadata`
@@ -40,26 +44,26 @@ export class MessagingService {
         debug: true
       }),
     });
-    this.connect();
-  }
-
-  connect() {
     this.client.connect().subscribe({
       onComplete: socket => {
         console.info('Connected');
         this.socket = socket;
       },
       onError: error => {
-        console.error(error);
-        setTimeout(() => {
-          console.info("Reconnecting...");
-          this.connect();
-        }, 5000);
+        console.error("Disconnected", error);
+        this.reconnect();
       },
       onSubscribe: cancel => {/* call cancel() to abort */
         console.info('subscribe');
       }
     });
+  }
+
+  reconnect() {
+    setTimeout(() => {
+      console.info("Reconnecting...");
+      this.connect();
+    }, 5000);
   }
 
   requestStream(route: string, data: any) {
@@ -94,7 +98,7 @@ export class MessagingService {
 
     setTimeout(() => {
       this.waitForSocket(callback);
-    }, 10);
+    }, 5000);
   }
 
   private encodeRoute(route: string): string {
