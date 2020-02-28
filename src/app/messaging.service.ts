@@ -45,12 +45,26 @@ export class MessagingService {
   }
 
   requestStream(route: string, data: any) {
-    this.socket.requestStream({
-      metadata: this.encodeRoute(route),
-      data
-    }).subscribe(x => {
-      console.info('Event', x);
+    this.waitForSocket(socket => {
+      socket.requestStream({
+        metadata: this.encodeRoute(route),
+        data
+      }).subscribe(x => {
+        console.info('Event', x);
+      });
     });
+  }
+
+  waitForSocket(callback: (socket: ReactiveSocket<any, any>) => any) {
+    if (this.socket != null) {
+      callback(this.socket);
+      return;
+    }
+
+    setTimeout(() => {
+      console.debug("Waiting for connection...");
+      this.waitForSocket(callback);
+    }, 100);
   }
 
   private encodeRoute(route: string): Buffer {
