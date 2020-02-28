@@ -19,38 +19,7 @@ export class AppComponent {
   now = null;
 
   constructor() {
-    const client = new RSocketClient({
-      serializers: JsonSerializers,
-      setup: {
-        // ms btw sending keepalive to server
-        keepAlive: 60000,
-        // ms timeout if no keepalive response
-        lifetime: 180000,
-        // format of `data`
-        dataMimeType: 'application/json',
-        // format of `metadata`
-        metadataMimeType: MESSAGE_RSOCKET_ROUTING.string,
-      },
-      transport: new RSocketWebSocketClient({
-        url: 'ws://192.168.10.2:8759/rsocket',
-        debug: true
-      }, BufferEncoders),
-    });
 
-    client.connect().subscribe({
-      onComplete: socket => {
-        console.info('Connected');
-        socket.requestStream({
-          metadata: Buffer.from('events')
-        }).subscribe(x => {
-          console.info('Event', x);
-        });
-      },
-      onError: error => console.error(error),
-      onSubscribe: cancel => {/* call cancel() to abort */
-        console.info('subscribe');
-      }
-    });
 
     timer(0, 1000)
       .subscribe(x => {
