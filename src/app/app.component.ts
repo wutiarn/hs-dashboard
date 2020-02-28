@@ -5,7 +5,7 @@ import DateTimeFormatOptions = Intl.DateTimeFormatOptions;
 import {
   RSocketClient,
   JsonSerializers,
-  encodeAndAddWellKnownMetadata,
+  BufferEncoders,
   MESSAGE_RSOCKET_ROUTING
 } from 'rsocket-core';
 import RSocketWebSocketClient from 'rsocket-websocket-client';
@@ -31,14 +31,19 @@ export class AppComponent {
         // format of `metadata`
         metadataMimeType: MESSAGE_RSOCKET_ROUTING.string,
       },
-      transport: new RSocketWebSocketClient({url: 'ws://192.168.10.2:8759'}),
+      transport: new RSocketWebSocketClient({
+        url: 'ws://192.168.10.2:8759/rsocket',
+        debug: true
+      }, BufferEncoders),
     });
 
     client.connect().subscribe({
       onComplete: socket => {
         console.info('Connected');
         socket.requestStream({
-          metadata: 'events'
+          metadata: Buffer.from('events')
+        }).subscribe(x => {
+          console.info('Event', x);
         });
       },
       onError: error => console.error(error),
