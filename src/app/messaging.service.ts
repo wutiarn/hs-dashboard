@@ -1,9 +1,16 @@
 import {Injectable, OnInit} from '@angular/core';
-import {BufferEncoders, JsonSerializers, MESSAGE_RSOCKET_ROUTING, RSocketClient, MAX_STREAM_ID} from "rsocket-core";
+import {
+  BufferEncoders,
+  JsonSerializers,
+  JsonSerializer,
+  IdentitySerializer,
+  MESSAGE_RSOCKET_ROUTING,
+  RSocketClient,
+  MAX_STREAM_ID
+} from "rsocket-core";
 import {ReactiveSocket} from "rsocket-types";
 import RSocketWebSocketClient from "rsocket-websocket-client";
 import {Buffer} from 'buffer/';
-import {logger} from "codelyzer/util/logger";
 
 @Injectable({
   providedIn: 'root'
@@ -14,7 +21,10 @@ export class MessagingService {
 
   constructor() {
     this.client = new RSocketClient({
-      serializers: JsonSerializers,
+      serializers: {
+        data: JsonSerializer,
+        metadata: IdentitySerializer
+      },
       setup: {
         // ms btw sending keepalive to server
         keepAlive: 60000,
