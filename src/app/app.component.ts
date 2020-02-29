@@ -9,6 +9,7 @@ import {TimestampEventDto} from "./dto/event/TimestampEventDto";
 })
 export class AppComponent {
   event = new TimestampEventDto();
+  connectionStatus: string;
 
   constructor(private messagingService: MessagingService) {
     messagingService.requestStream<TimestampEventDto>('events.timestamp')
@@ -17,5 +18,18 @@ export class AppComponent {
           this.event = value;
         }
       });
+    messagingService.connectedStatusSubject.subscribe({
+        next: value => {
+          switch (value) {
+            case true:
+              this.connectionStatus = "online";
+              break;
+            case false:
+              this.connectionStatus = "offline";
+              break;
+          }
+        }
+      }
+    );
   }
 }

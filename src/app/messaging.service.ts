@@ -13,8 +13,26 @@ export class MessagingService {
 
   private activeSubscriptions = new Map<string, ActiveSubscription>();
 
+  connectedStatusSubject = new BehaviorSubject<boolean>(false);
+
   constructor() {
     this.connect();
+  }
+
+
+  requestStream<T>(route: string, request: any = null, durable: boolean = true): Subject<T> {
+    const subject = new Subject<any>();
+
+    this.doRequestStream(route, request, subject);
+
+    console.debug(`Adding ${route} to activeSubscriptions`);
+    this.activeSubscriptions.set(route, {
+      route,
+      request,
+      subject
+    });
+
+    return subject;
   }
 
   private doRequestStream(route: string, request: any, subject: Subject<any>) {
@@ -26,7 +44,7 @@ export class MessagingService {
         data: {}
       }).subscribe({
         onComplete: () => console.info(`[${route}] Stream completed`),
-        onError: (e) => console.error(`[${route}] stream error`, e),
+        onError: (e) => console.error(`[${route}] Stream error`, e),
         onNext: (msg) => {
           console.debug(`[${route}] Received`, msg.data);
           subject.next(msg.data);
@@ -45,22 +63,7 @@ export class MessagingService {
     }
   }
 
-  requestStream<T>(route: string, request: any = null, durable: boolean = true): Subject<T> {
-    const subject = new Subject<any>();
-
-    this.doRequestStream(route, request, subject);
-
-    console.debug(`Adding ${route} to activeSubscriptions`);
-    this.activeSubscriptions.set(route, {
-      route,
-      request,
-      subject
-    });
-
-    return subject;
-  }
-
-  connect() {
+  private connect() {
     this.client = new RSocketClient({
       serializers: {
         data: JsonSerializer,
@@ -81,7 +84,7 @@ export class MessagingService {
         wsCreator: url => {
           const webSocket = new WebSocket(url);
           webSocket.addEventListener("close", (ev) => {
-            this.reconnect();
+            this.onDisconnected();
           });
           return webSocket;
         },
@@ -90,14 +93,24 @@ export class MessagingService {
     });
     this.client.connect().subscribe({
       onComplete: socket => {
-        console.info('Connected');
         this.socket = socket;
-        this.resubscribe();
+        this.onConnected();
       }
     });
   }
 
-  reconnect() {
+  private onConnected() {
+    console.info('Connected');
+    this.resubscribe();
+    this.connectedStatusSubject.next(true);
+  }
+
+  private onDisconnected() {
+    this.connectedStatusSubject.next(false);
+    this.reconnect();
+  }
+
+  private reconnect() {
     setTimeout(() => {
       this.connect();
     }, 5000);
