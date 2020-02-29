@@ -20,7 +20,7 @@ export class MessagingService {
   private doRequestStream(route: string, request: any, subject: Subject<any>) {
     if (this.socket != null) {
       const metadata = this.encodeRoute(route);
-      console.debug(`Requesting ${route} stream. Request:`, request);
+      console.debug(`[${route}] Subscribing stream. Request:`, request);
       this.socket.requestStream({
         metadata,
         data: {}
@@ -35,7 +35,7 @@ export class MessagingService {
           subscription.request(MAX_STREAM_ID);
           subject.subscribe({
             complete: () => {
-              console.debug(`Removing ${route} from activeSubscriptions`);
+              console.debug(`[${route}] Stream completed`);
               subscription.cancel();
               this.activeSubscriptions.delete(route);
             }
@@ -105,7 +105,6 @@ export class MessagingService {
 
   private resubscribe() {
     for (const s of this.activeSubscriptions.values()) {
-      console.info("Resubscribing", s);
       this.doRequestStream(s.route, s.request, s.subject);
     }
   }
