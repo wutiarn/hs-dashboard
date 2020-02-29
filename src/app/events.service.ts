@@ -12,6 +12,11 @@ export class EventsService {
 
   getEvents() { // Observable<EventDto<any>>
     console.info("EventsService: calling requestStream()");
-    this.messagingService.requestStream("events", null);
+    this.messagingService.requestStream("events", null)
+      .subscribe({
+        next: value => {
+          console.info("Subject next", value);
+        }
+      });
   }
 }

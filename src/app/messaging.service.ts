@@ -2,6 +2,7 @@ import {Injectable} from '@angular/core';
 import {IdentitySerializer, JsonSerializer, MAX_STREAM_ID, RSocketClient} from "rsocket-core";
 import {ReactiveSocket} from "rsocket-types";
 import RSocketWebSocketClient from "rsocket-websocket-client";
+import {BehaviorSubject} from "rxjs";
 
 @Injectable({
   providedIn: 'root'
@@ -10,8 +11,48 @@ export class MessagingService {
   private client: RSocketClient<any, any>;
   private socket: ReactiveSocket<any, any>;
 
+  private activeSubscriptions = new Map<string, ActiveSubscription>();
+
   constructor() {
-    this.connect()
+    this.connect();
+  }
+
+  requestStream<T>(route: string, request: any, durable: boolean = true): BehaviorSubject<T> {
+    const subject = new BehaviorSubject<any>(null);
+    this.waitForSocket(socket => {
+      const metadata = this.encodeRoute(route);
+      console.debug(`Requesting ${route} stream`, socket);
+      socket.requestStream({
+        metadata,
+        data: {}
+      }).subscribe({
+        onComplete: () => console.info(`[${route}] Stream completed`),
+        onError: (e) => console.error(`[${route}] stream error`, e),
+        onNext: (msg) => {
+          console.debug(`[${route}] Received`, msg.data);
+          subject.next(msg.data);
+        },
+        onSubscribe: subscription => {
+          subscription.request(MAX_STREAM_ID);
+          subject.subscribe({
+            complete: () => {
+              console.debug(`Removing ${route} from activeSubscriptions`);
+              subscription.cancel();
+              this.activeSubscriptions.delete(route);
+            }
+          });
+        }
+      });
+      if (durable) {
+        console.debug(`Adding ${route} to activeSubscriptions`);
+        this.activeSubscriptions.set(route, {
+          route,
+          request,
+          subject
+        });
+      }
+    });
+    return subject;
   }
 
   connect() {
@@ -22,9 +63,9 @@ export class MessagingService {
       },
       setup: {
         // ms btw sending keepalive to server
-        keepAlive: 1000,
+        keepAlive: 10000,
         // ms timeout if no keepalive response
-        lifetime: 5000,
+        lifetime: 30000,
         // format of `data`
         dataMimeType: 'application/json',
         // format of `metadata`
@@ -45,10 +86,10 @@ export class MessagingService {
     this.client.connect().subscribe({
       onComplete: socket => {
         console.info('Connected');
+        this.resubscribe();
         this.socket = socket;
       }
     });
-
   }
 
   reconnect() {
@@ -57,27 +98,16 @@ export class MessagingService {
     }, 5000);
   }
 
-  requestStream(route: string, data: any) {
-    this.waitForSocket(socket => {
-      const metadata = this.encodeRoute(route);
-      console.debug("Requesting stream", socket);
-      socket.requestStream({
-        metadata,
-        data: {}
-      }).subscribe({
-        onComplete: () => console.info(`[${route}] Stream completed`),
-        onError: (e) => console.error(`[${route}] stream error`, e),
-        onNext: (msg) => {
-          console.debug(`[${route}] Received`, msg);
-        },
-        onSubscribe: subscription => {
-          subscription.request(MAX_STREAM_ID);
-        }
-      });
-    });
+  private resubscribe() {
+    console.info("Resubscribing", this.activeSubscriptions);
+    for (const s of this.activeSubscriptions.values()) {
+      console.info("Resubscribing", s);
+      this.requestStream(s.route, s.request, false);
+    }
+    console.info("Resubscribing done");
   }
 
-  waitForSocket(callback: (socket: ReactiveSocket<any, any>) => any) {
+  private waitForSocket(callback: (socket: ReactiveSocket<any, any>) => any) {
     if (this.socket != null) {
       console.info("Socket acquired");
       callback(this.socket);
@@ -92,4 +122,10 @@ export class MessagingService {
   private encodeRoute(route: string): string {
     return String.fromCharCode(route.length) + route;
   }
+}
+
+class ActiveSubscription {
+  route: string;
+  request: any;
+  subject: BehaviorSubject<any>;
 }
