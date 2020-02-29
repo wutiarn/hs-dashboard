@@ -1,5 +1,5 @@
 import {Component, Input, OnInit} from '@angular/core';
-import {MessagingService} from "../../messaging.service";
+import {MessagingService} from "../../service/messaging.service";
 
 @Component({
   selector: 'app-offline-widget',

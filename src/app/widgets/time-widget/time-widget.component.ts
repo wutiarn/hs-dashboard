@@ -1,6 +1,6 @@
 import {Component} from '@angular/core';
 import {TimestampEventDto} from "../../dto/event/TimestampEventDto";
-import {MessagingService} from "../../messaging.service";
+import {MessagingService} from "../../service/messaging.service";
 
 @Component({
     selector: 'app-time-widget',
