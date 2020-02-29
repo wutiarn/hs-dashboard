@@ -109,18 +109,6 @@ export class MessagingService {
     }
   }
 
-  private waitForSocket(callback: (socket: ReactiveSocket<any, any>) => any) {
-    if (this.socket != null) {
-      console.info("Socket acquired");
-      callback(this.socket);
-      return;
-    }
-
-    setTimeout(() => {
-      this.waitForSocket(callback);
-    }, 5000);
-  }
-
   private encodeRoute(route: string): string {
     return String.fromCharCode(route.length) + route;
   }
