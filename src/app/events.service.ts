@@ -15,7 +15,6 @@ export class EventsService {
     console.info("EventsService: calling requestStream()");
     const subject = this.messagingService.requestStream("events", null);
     subject
-      .pipe(take(3))
       .subscribe({
         next: value => {
           console.info("Subject next", value);
