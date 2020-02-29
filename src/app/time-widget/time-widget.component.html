@@ -1,0 +1,7 @@
+<div class="centered">
+  <div class="onlineBlock" *ngIf="isConnected">
+    <div class="time">{{event.time}}</div>
+    <div class="date">{{event.date}}</div>
+  </div>
+  <div class="onlineBlock" *ngIf="!isConnected">OFFLINE</div>
+</div>
