@@ -13,6 +13,8 @@ import { Pm25WidgetComponent } from './widgets/pm25-widget/pm25-widget.component
 import { TvocWidgetComponent } from './widgets/tvoc-widget/tvoc-widget.component';
 import { BudgetTomorrowWidgetComponent } from './widgets/budget-tomorrow-widget/budget-tomorrow-widget.component';
 import { BudgetTodayWidgetComponent } from './widgets/budget-today-widget/budget-today-widget.component';
+import { BudgetMonthWidgetComponent } from './widgets/budget-month-widget/budget-month-widget.component';
+import { BudgetCardBalanceWidgetComponent } from './widgets/budget-card-balance-widget/budget-card-balance-widget.component';
 
 @NgModule({
   declarations: [
@@ -27,7 +29,9 @@ import { BudgetTodayWidgetComponent } from './widgets/budget-today-widget/budget
     Pm25WidgetComponent,
     TvocWidgetComponent,
     BudgetTomorrowWidgetComponent,
-    BudgetTodayWidgetComponent
+    BudgetTodayWidgetComponent,
+    BudgetMonthWidgetComponent,
+    BudgetCardBalanceWidgetComponent
   ],
   imports: [
     BrowserModule
