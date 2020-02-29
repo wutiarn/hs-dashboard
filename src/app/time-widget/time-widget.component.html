@@ -3,5 +3,8 @@
     <div class="time">{{event.time}}</div>
     <div class="date">{{event.date}}</div>
   </div>
-  <div class="onlineBlock" *ngIf="!isConnected">OFFLINE</div>
+  <div class="offlineBlock" *ngIf="!isConnected">
+    <div class="offline">OFFLINE</div>
+    <div class="offlineMessage">Last connection: {{lastConnectionTimestamp}}</div>
+  </div>
 </div>
