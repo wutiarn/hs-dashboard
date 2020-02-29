@@ -7,6 +7,7 @@ import { BudgetWidgetComponent } from './widgets/budget-widget/budget-widget.com
 import { OfflineWidgetComponent } from './widgets/offline-widget/offline-widget.component';
 import {AbstractTextWidgetComponent} from "./widgets/abstract/text-widget/abstract-text-widget.component";
 import { Co2WidgetComponent } from './widgets/co2-widget/co2-widget.component';
+import { TempWidgetComponent } from './widgets/temp-widget/temp-widget.component';
 
 @NgModule({
   declarations: [
@@ -15,7 +16,8 @@ import { Co2WidgetComponent } from './widgets/co2-widget/co2-widget.component';
     BudgetWidgetComponent,
     OfflineWidgetComponent,
     AbstractTextWidgetComponent,
-    Co2WidgetComponent
+    Co2WidgetComponent,
+    TempWidgetComponent
   ],
   imports: [
     BrowserModule
