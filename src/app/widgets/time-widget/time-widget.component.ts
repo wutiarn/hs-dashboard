@@ -1,6 +1,7 @@
 import {Component} from '@angular/core';
 import {TimestampEventDto} from "../../dto/event/TimestampEventDto";
 import {MessagingService} from "../../service/messaging.service";
+import {TimestampEventsService} from "../../service/timestamp-events.service";
 
 @Component({
     selector: 'app-time-widget',
@@ -11,8 +12,8 @@ export class TimeWidgetComponent {
 
     event = new TimestampEventDto();
 
-    constructor(private messagingService: MessagingService) {
-        messagingService.requestStream<TimestampEventDto>('events.timestamp')
+    constructor(private timestampEventsService: TimestampEventsService) {
+      timestampEventsService.timestampEventsSubject
             .subscribe({
                 next: value => {
                     this.event = value;
