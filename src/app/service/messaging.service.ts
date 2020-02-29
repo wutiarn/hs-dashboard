@@ -20,7 +20,7 @@ export class MessagingService {
   }
 
 
-  requestStream<T>(route: string, request: any = null, durable: boolean = true): Subject<T> {
+  requestStream<T>(route: string, request: any = null): Subject<T> {
     const subject = new Subject<any>();
 
     this.doRequestStream(route, request, subject);
