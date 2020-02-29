@@ -17,12 +17,11 @@ export class MessagingService {
     this.connect();
   }
 
-  requestStream<T>(route: string, request: any, durable: boolean = true): BehaviorSubject<T> {
-    const subject = new BehaviorSubject<any>(null);
-    this.waitForSocket(socket => {
+  private doRequestStream(route: string, request: any, subject: BehaviorSubject<any>) {
+    if (this.socket != null) {
       const metadata = this.encodeRoute(route);
-      console.debug(`Requesting ${route} stream`, socket);
-      socket.requestStream({
+      console.debug(`Requesting ${route} stream. Request:`, request);
+      this.socket.requestStream({
         metadata,
         data: {}
       }).subscribe({
@@ -43,15 +42,21 @@ export class MessagingService {
           });
         }
       });
-      if (durable) {
-        console.debug(`Adding ${route} to activeSubscriptions`);
-        this.activeSubscriptions.set(route, {
-          route,
-          request,
-          subject
-        });
-      }
+    }
+  }
+
+  requestStream<T>(route: string, request: any, durable: boolean = true): BehaviorSubject<T> {
+    const subject = new BehaviorSubject<any>(null);
+
+    this.doRequestStream(route, request, subject);
+
+    console.debug(`Adding ${route} to activeSubscriptions`);
+    this.activeSubscriptions.set(route, {
+      route,
+      request,
+      subject
     });
+
     return subject;
   }
 
@@ -86,8 +91,8 @@ export class MessagingService {
     this.client.connect().subscribe({
       onComplete: socket => {
         console.info('Connected');
-        this.resubscribe();
         this.socket = socket;
+        this.resubscribe();
       }
     });
   }
@@ -99,12 +104,10 @@ export class MessagingService {
   }
 
   private resubscribe() {
-    console.info("Resubscribing", this.activeSubscriptions);
     for (const s of this.activeSubscriptions.values()) {
       console.info("Resubscribing", s);
-      this.requestStream(s.route, s.request, false);
+      this.doRequestStream(s.route, s.request, s.subject);
     }
-    console.info("Resubscribing done");
   }
 
   private waitForSocket(callback: (socket: ReactiveSocket<any, any>) => any) {
