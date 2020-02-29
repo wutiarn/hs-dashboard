@@ -1,15 +1,6 @@
 import {Component} from '@angular/core';
-import {timer} from 'rxjs';
-import DateTimeFormat = Intl.DateTimeFormat;
-import DateTimeFormatOptions = Intl.DateTimeFormatOptions;
-import {
-  RSocketClient,
-  JsonSerializers,
-  BufferEncoders,
-  MESSAGE_RSOCKET_ROUTING
-} from 'rsocket-core';
-import RSocketWebSocketClient from 'rsocket-websocket-client';
-import {EventsService} from "./events.service";
+import {MessagingService} from "./messaging.service";
+import {TimestampEventDto} from "./dto/event/TimestampEventDto";
 
 @Component({
   selector: 'app-root',
@@ -17,25 +8,29 @@ import {EventsService} from "./events.service";
   styleUrls: ['./app.component.styl']
 })
 export class AppComponent {
-  now = null;
+  event = new TimestampEventDto();
 
-  constructor(private eventsService: EventsService) {
-
-
-    timer(0, 1000)
-      .subscribe(x => {
-        const now = new Date();
-        const options = <DateTimeFormatOptions>{
-          day: '2-digit',
-          month: 'short',
-          // year: 'numeric',
-          weekday: 'long',
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit',
-          hour12: false
-        };
-        this.now = now.toLocaleString('en', options);
+  constructor(private messagingService: MessagingService) {
+    messagingService.requestStream<TimestampEventDto>('events.timestamp')
+      .subscribe({
+        next: value => {
+          this.event = value;
+        }
       });
+    // timer(0, 1000)
+    //   .subscribe(x => {
+    //     const now = new Date();
+    //     const options = {
+    //       day: '2-digit',
+    //       month: 'short',
+    //       // year: 'numeric',
+    //       weekday: 'long',
+    //       hour: '2-digit',
+    //       minute: '2-digit',
+    //       second: '2-digit',
+    //       hour12: false
+    //     } as DateTimeFormatOptions;
+    // this.now = now.toLocaleString('en', options);
+    // });
   }
 }
