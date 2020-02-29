@@ -5,7 +5,9 @@
   </app-offline-widget>
   <app-time-widget *ngIf="isConnected"></app-time-widget>
 
-  <app-budget-widget *ngIf="isConnected"></app-budget-widget>
+  <app-budget-balance-widget *ngIf="isConnected"></app-budget-balance-widget>
+  <app-budget-today-widget *ngIf="isConnected"></app-budget-today-widget>
+  <app-budget-tomorrow-widget *ngIf="isConnected"></app-budget-tomorrow-widget>
 
   <app-co2-widget *ngIf="isConnected"></app-co2-widget>
   <app-temp-widget *ngIf="isConnected"></app-temp-widget>
