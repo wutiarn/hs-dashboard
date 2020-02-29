@@ -5,11 +5,8 @@ import { Component, OnInit } from '@angular/core';
   templateUrl: './budget-widget.component.html',
   styleUrls: ['./budget-widget.component.styl']
 })
-export class BudgetWidgetComponent implements OnInit {
+export class BudgetWidgetComponent {
 
   constructor() { }
-
-  ngOnInit(): void {
-  }
 
 }
