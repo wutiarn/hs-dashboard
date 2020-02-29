@@ -10,8 +10,6 @@ import {MessagingService} from "../messaging.service";
 export class TimeWidgetComponent {
 
     event = new TimestampEventDto();
-    isConnected = false;
-    lastConnectionTimestamp = "never";
 
     constructor(private messagingService: MessagingService) {
         messagingService.requestStream<TimestampEventDto>('events.timestamp')
@@ -20,23 +18,5 @@ export class TimeWidgetComponent {
                     this.event = value;
                 }
             });
-        messagingService.connectedStatusSubject.subscribe({
-                next: value => {
-                    if (this.isConnected === true && value === false) {
-                        this.lastConnectionTimestamp = new Date().toLocaleString('en', {
-                                day: '2-digit',
-                                month: 'short',
-                                weekday: 'long',
-                                hour: '2-digit',
-                                minute: '2-digit',
-                                second: '2-digit',
-                                hour12: false
-                            }
-                        );
-                    }
-                    this.isConnected = value;
-                }
-            }
-        );
     }
 }

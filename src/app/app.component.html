@@ -1,4 +1,8 @@
 <div class="wrapper">
-  <app-time-widget></app-time-widget>
-  <app-budget-widget></app-budget-widget>
+  <app-offline-widget *ngIf="!isConnected"
+                      [lastConnectionTimestamp]="lastConnectionTimestamp"
+                      [lastConnectionAttemptTimestamp]="lastConnectionAttemptTimestamp">
+  </app-offline-widget>
+  <app-time-widget *ngIf="isConnected"></app-time-widget>
+  <app-budget-widget *ngIf="isConnected"></app-budget-widget>
 </div>
