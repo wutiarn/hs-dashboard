@@ -64,6 +64,7 @@ export class MessagingService {
   }
 
   private connect() {
+    console.info("Connecting...");
     this.client = new RSocketClient({
       serializers: {
         data: JsonSerializer,
@@ -71,13 +72,17 @@ export class MessagingService {
       },
       setup: {
         // ms btw sending keepalive to server
-        keepAlive: 10000,
+        keepAlive: 1000,
         // ms timeout if no keepalive response
-        lifetime: 30000,
+        lifetime: 5000,
         // format of `data`
         dataMimeType: 'application/json',
         // format of `metadata`
-        metadataMimeType: "message/x.rsocket.routing.v0",
+        metadataMimeType: "message/x.rsocket.routing.v0"
+      },
+      errorHandler: error => {
+        console.error("RSocket error", error);
+        this.onDisconnected();
       },
       transport: new RSocketWebSocketClient({
         url: 'ws://192.168.10.2:8759/rsocket',
@@ -92,11 +97,13 @@ export class MessagingService {
       }),
     });
     this.client.connect().subscribe({
-      onComplete: socket => {
-        this.socket = socket;
-        this.onConnected();
+        onComplete: socket => {
+          this.socket = socket;
+          (window as any).socket = socket;
+          this.onConnected();
+        }
       }
-    });
+    );
   }
 
   private onConnected() {
@@ -106,6 +113,11 @@ export class MessagingService {
   }
 
   private onDisconnected() {
+    console.info('Disconnected');
+
+    this.socket?.close();
+    this.socket = null;
+
     this.connectedStatusSubject.next(false);
     this.reconnect();
   }
