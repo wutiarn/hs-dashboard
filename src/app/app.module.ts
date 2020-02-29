@@ -9,6 +9,7 @@ import {AbstractTextWidgetComponent} from "./widgets/abstract/text-widget/abstra
 import { Co2WidgetComponent } from './widgets/co2-widget/co2-widget.component';
 import { TempWidgetComponent } from './widgets/temp-widget/temp-widget.component';
 import { RhWidgetComponent } from './widgets/rh-widget/rh-widget.component';
+import { Pm25WidgetComponent } from './widgets/pm25-widget/pm25-widget.component';
 
 @NgModule({
   declarations: [
@@ -19,7 +20,8 @@ import { RhWidgetComponent } from './widgets/rh-widget/rh-widget.component';
     AbstractTextWidgetComponent,
     Co2WidgetComponent,
     TempWidgetComponent,
-    RhWidgetComponent
+    RhWidgetComponent,
+    Pm25WidgetComponent
   ],
   imports: [
     BrowserModule
