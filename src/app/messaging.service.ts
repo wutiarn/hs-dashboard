@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {IdentitySerializer, JsonSerializer, MAX_STREAM_ID, RSocketClient} from "rsocket-core";
 import {ReactiveSocket} from "rsocket-types";
 import RSocketWebSocketClient from "rsocket-websocket-client";
-import {BehaviorSubject} from "rxjs";
+import {BehaviorSubject, Subject} from "rxjs";
 
 @Injectable({
   providedIn: 'root'
@@ -17,7 +17,7 @@ export class MessagingService {
     this.connect();
   }
 
-  private doRequestStream(route: string, request: any, subject: BehaviorSubject<any>) {
+  private doRequestStream(route: string, request: any, subject: Subject<any>) {
     if (this.socket != null) {
       const metadata = this.encodeRoute(route);
       console.debug(`Requesting ${route} stream. Request:`, request);
@@ -45,8 +45,8 @@ export class MessagingService {
     }
   }
 
-  requestStream<T>(route: string, request: any, durable: boolean = true): BehaviorSubject<T> {
-    const subject = new BehaviorSubject<any>(null);
+  requestStream<T>(route: string, request: any, durable: boolean = true): Subject<T> {
+    const subject = new Subject<any>();
 
     this.doRequestStream(route, request, subject);
 
@@ -130,5 +130,5 @@ export class MessagingService {
 class ActiveSubscription {
   route: string;
   request: any;
-  subject: BehaviorSubject<any>;
+  subject: Subject<any>;
 }

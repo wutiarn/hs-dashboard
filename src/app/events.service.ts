@@ -13,7 +13,7 @@ export class EventsService {
 
   getEvents() { // Observable<EventDto<any>>
     console.info("EventsService: calling requestStream()");
-    let subject = this.messagingService.requestStream("events", null);
+    const subject = this.messagingService.requestStream("events", null);
     subject
       .pipe(take(3))
       .subscribe({
