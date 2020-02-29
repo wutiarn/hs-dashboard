@@ -10,6 +10,7 @@ import { Co2WidgetComponent } from './widgets/co2-widget/co2-widget.component';
 import { TempWidgetComponent } from './widgets/temp-widget/temp-widget.component';
 import { RhWidgetComponent } from './widgets/rh-widget/rh-widget.component';
 import { Pm25WidgetComponent } from './widgets/pm25-widget/pm25-widget.component';
+import { TvocWidgetComponent } from './widgets/tvoc-widget/tvoc-widget.component';
 
 @NgModule({
   declarations: [
@@ -21,7 +22,8 @@ import { Pm25WidgetComponent } from './widgets/pm25-widget/pm25-widget.component
     Co2WidgetComponent,
     TempWidgetComponent,
     RhWidgetComponent,
-    Pm25WidgetComponent
+    Pm25WidgetComponent,
+    TvocWidgetComponent
   ],
   imports: [
     BrowserModule
